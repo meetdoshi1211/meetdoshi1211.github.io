@@ -77,18 +77,18 @@ body {
     max-width: 80%;
 }
 
-.dealer-area {
+/* .dealer-area {
     margin-bottom: 20px;
 }
 
 .player-area {
     margin-top: 20px;
-}
+} */
 
 
 .area-label {
     color: #fff;
-    font-size: 1.2rem;
+    font-size: 1rem;
     text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.7);
     margin-bottom: 5px;
     font-weight: bold;
@@ -117,6 +117,7 @@ body {
     height: 100%;
     object-fit: cover;
     border-radius: var(--card-border-radius);
+    background-size: cover;
 }
 
 .button {
@@ -181,7 +182,8 @@ body {
         font-size: 1rem;
     }
 
-    .score, .result {
+    .score, .resu
+lt {
         font-size: 0.9rem;
     }
 

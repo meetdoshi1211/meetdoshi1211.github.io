@@ -1,19 +1,5 @@
 const SUITS = ["♠", "♣", "♥", "♦"];
-const VALUES = [
-  "A",
-  "2",
-  "3",
-  "4",
-  "5",
-  "6",
-  "7",
-  "8",
-  "9",
-  "10",
-  "J",
-  "Q",
-  "K",
-];
+const VALUES = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
 
 class Card {
   constructor(value, suit) {
@@ -35,12 +21,7 @@ let timeoutID;
 document.getElementById("deal-button").addEventListener("click", dealCards);
 document.getElementById("hit-button").addEventListener("click", playerHit);
 document.getElementById("stand-button").addEventListener("click", playerStand);
-document
-  .getElementById("restart-button")
-  .addEventListener("click", function () {
-    clearTimeout(timeoutID); // Clear the timeout
-    restartGame(); // Manually restart the game
-  });
+document.getElementById("restart-button").addEventListener("click", restartGame);
 
 function createDeck() {
   deck = [];
@@ -49,53 +30,32 @@ function createDeck() {
       deck.push(new Card(value, suit));
     }
   }
-  deck = deck.sort(() => Math.random() - 0.5); // Shuffle
+  deck = deck.sort(() => Math.random() - 0.5);
 }
 
 function createCardElement(card, isHidden = false) {
-//   const cardDiv = document.createElement("div");
-//   cardDiv.className = `card${isHidden ? " hidden" : ""}`;
+  const cardDiv = document.createElement("div");
+  cardDiv.className = `card${isHidden ? " hidden" : ""}`;
 
-//   cardDiv.innerHTML = `
-//                 <div class="card-inner">
-//                     <div class="card-front">
-//                         <div class="card-value ${card.color}">${card.value}</div>
-//                         <div class="card-suit ${card.color}">${card.suit}</div>
-//                         <div class="card-value ${card.color}" style="transform: rotate(180deg)">${card.value}</div>
-//                     </div>
-//                     <div class="card-back"></div>
-//                 </div>
-//             `;
+  let imagePath;
+  if (isHidden) {
+    imagePath = `cards/back.png`;
+  } else {
+    const suitName = card.suit.toLowerCase().replace("♠", "spades").replace("♣", "clubs").replace("♥", "hearts").replace("♦", "diamonds");
+    const valueName = card.value === "A" ? "ace" : card.value === "K" ? "king" : card.value === "Q" ? "queen" : card.value === "J" ? "jack" : card.value;
+    imagePath = `cards/${valueName}_of_${suitName}.png`;
+  }
 
-//   return cardDiv;
-
-const cardDiv = document.createElement("div");
-cardDiv.className = `card${isHidden ? " hidden" : ""}`;
-
-// Convert card suit and value to lowercase format for image file naming
-const suitName = card.suit.toLowerCase().replace('♠', 'spades')
-                                       .replace('♣', 'clubs')
-                                       .replace('♥', 'hearts')
-                                       .replace('♦', 'diamonds');
-const valueName = card.value === "A" ? "ace" :
-                  card.value === "K" ? "king" :
-                  card.value === "Q" ? "queen" :
-                  card.value === "J" ? "jack" :
-                  card.value;
-
-// Path to the image in the cards folder
-const imagePath = `cards/${valueName}_of_${suitName}.png`;
-
-cardDiv.innerHTML = `
+  cardDiv.innerHTML = `
     <div class="card-inner">
         <div class="card-front">
             <img src="${imagePath}" alt="${card.value} of ${card.suit}" class="card-image">
         </div>
         <div class="card-back"></div>
     </div>
-`;
+  `;
 
-return cardDiv;
+  return cardDiv;
 }
 
 function dealCards() {
@@ -104,26 +64,22 @@ function dealCards() {
   dealerHand = [deck.pop(), deck.pop()];
   gameActive = true;
 
-  // Clear previous cards
   document.getElementById("dealer-cards").innerHTML = "";
   document.getElementById("player-cards").innerHTML = "";
 
-  // Reset dealer's score
   document.getElementById("dealer-score").innerText = "";
 
-  // Deal dealer's cards (second card hidden)
   dealerHand.forEach((card, index) => {
     const cardElement = createCardElement(card, index === 1);
     document.getElementById("dealer-cards").appendChild(cardElement);
   });
 
-  // Deal player's cards (all visible)
   playerHand.forEach((card) => {
     const cardElement = createCardElement(card, false);
     document.getElementById("player-cards").appendChild(cardElement);
   });
 
-  updateScores(); // Display initial scores
+  updateScores();
   toggleButtons(true);
   checkGameState();
 }
@@ -136,20 +92,19 @@ function playerHit() {
   document.getElementById("player-cards").appendChild(cardElement);
 
   updateScores();
-  checkGameState(); // Check if the game has ended (busted or won)
+  checkGameState();
 }
 
 function playerStand() {
   if (!gameActive) return;
   gameActive = false;
 
-  // Reveal dealer's hidden card
   const hiddenCard = document.querySelector(".card.hidden");
   if (hiddenCard) {
     hiddenCard.classList.remove("hidden");
+    hiddenCard.querySelector(".card-image").src = getCardImagePath(dealerHand[1]);
   }
 
-  // Dealer draws cards until they reach 17 or higher
   while (getHandValue(dealerHand) < 17) {
     const newCard = deck.pop();
     dealerHand.push(newCard);
@@ -163,16 +118,18 @@ function playerStand() {
 
 function updateScores(showDealerScore = false) {
   const playerScore = getHandValue(playerHand);
-  document.getElementById(
-    "player-score"
-  ).innerText = `Your Score: ${playerScore}`;
+  document.getElementById("player-score").innerText = `Your Score: ${playerScore}`;
 
   if (showDealerScore) {
     const dealerScore = getHandValue(dealerHand);
-    document.getElementById(
-      "dealer-score"
-    ).innerText = `Dealer Score: ${dealerScore}`;
+    document.getElementById("dealer-score").innerText = `Dealer Score: ${dealerScore}`;
   }
+}
+
+function getCardImagePath(card) {
+  const suitName = card.suit.toLowerCase().replace("♠", "spades").replace("♣", "clubs").replace("♥", "hearts").replace("♦", "diamonds");
+  const valueName = card.value === "A" ? "ace" : card.value === "K" ? "king" : card.value === "Q" ? "queen" : card.value === "J" ? "jack" : card.value;
+  return `cards/${valueName}_of_${suitName}.png`;
 }
 
 function getHandValue(hand) {
@@ -207,27 +164,18 @@ function checkGameState() {
     resultElement.innerText = "Bust! You lose.";
     resultElement.className = "result lose";
     gameActive = false;
-    document.getElementById("deal-button").style.display = "none"; // Hide Deal button
-    document.getElementById("hit-button").style.display = "none"; // Hide Hit button
-    document.getElementById("stand-button").style.display = "none"; // Hide Stand button
-    document.getElementById("restart-button").style.display = "inline-block"; // Show New Game button
-
-    // Reset the game after 3 seconds
-    timeoutID = setTimeout(() => {
-      restartGame();
-    }, 7000); // Reset after 3 seconds
+    document.getElementById("deal-button").style.display = "none";
+    document.getElementById("hit-button").style.display = "none";
+    document.getElementById("stand-button").style.display = "none";
+    document.getElementById("restart-button").style.display = "inline-block";
+    timeoutID = setTimeout(restartGame, 7000);
   } else if (playerScore == 21) {
-    resultElement.innerText = "It's a BlackJack!";
+    resultElement.innerText = "It's a BlackJack! You win!";
     resultElement.className = "result win";
     toggleButtons(false);
-    // Disable the "Deal" button and show the "New Game" button
-    document.getElementById("deal-button").style.display = "none"; // Hide Deal button
-    document.getElementById("restart-button").style.display = "inline-block"; // Show New Game button
-
-    // Reset game after 3 seconds
-    timeoutID = setTimeout(() => {
-      restartGame();
-    }, 7000); // 7000ms = 3 seconds
+    document.getElementById("deal-button").style.display = "none";
+    document.getElementById("restart-button").style.display = "inline-block";
+    timeoutID = setTimeout(restartGame, 7000);
   } else if (!gameActive) {
     if (dealerScore > 21) {
       resultElement.innerText = "Dealer busts! You win!";
@@ -243,48 +191,28 @@ function checkGameState() {
       resultElement.className = "result lose";
     }
     toggleButtons(false);
-    // Disable the "Deal" button and show the "New Game" button
-    document.getElementById("deal-button").style.display = "none"; // Hide Deal button
-    document.getElementById("restart-button").style.display = "inline-block"; // Show New Game button
-
-    // Reset game after 3 seconds
-    timeoutID = setTimeout(() => {
-      restartGame();
-    }, 7000); // 7000ms = 3 seconds
+    document.getElementById("deal-button").style.display = "none";
+    document.getElementById("restart-button").style.display = "inline-block";
+    timeoutID = setTimeout(restartGame, 7000);
   }
 }
 
 function toggleButtons(enable) {
-  document.getElementById("hit-button").style.display = enable
-    ? "inline-block"
-    : "none";
-  document.getElementById("stand-button").style.display = enable
-    ? "inline-block"
-    : "none";
-  document.getElementById("deal-button").style.display = enable
-    ? "none"
-    : "inline-block";
+  document.getElementById("hit-button").style.display = enable ? "inline-block" : "none";
+  document.getElementById("stand-button").style.display = enable ? "inline-block" : "none";
+  document.getElementById("deal-button").style.display = enable ? "none" : "inline-block";
 }
 
 function restartGame() {
   clearTimeout(timeoutID);
-  // Clear card areas
   document.getElementById("dealer-cards").innerHTML = "";
   document.getElementById("player-cards").innerHTML = "";
-
-  // Reset dealer's score
   document.getElementById("dealer-score").innerText = "";
-
-  // Clear scores and result
   document.getElementById("player-score").innerText = "";
   document.getElementById("result").innerText = "";
   document.getElementById("result").className = "result";
-
-  // Reset game state
   toggleButtons(false);
   gameActive = false;
-
-  // Reset action buttons
   document.getElementById("deal-button").style.display = "inline-block";
   document.getElementById("restart-button").style.display = "none";
 }
